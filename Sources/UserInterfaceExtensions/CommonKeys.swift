@@ -7,6 +7,8 @@
 
 import Foundation
 
+
+/// Common Keyboard key values
 public enum CommonKeys: Int, RawRepresentable {
     case deleteKey = 51
     case forwardDeleteKey = 117

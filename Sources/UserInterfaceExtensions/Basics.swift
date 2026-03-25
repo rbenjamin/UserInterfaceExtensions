@@ -7,10 +7,105 @@
 
 import SwiftUI
 
-// MARK: - Modify -
+// MARK: - Platform Modifiers -
+
+/// Modifiers to only run specific code on a chosen platform.
 extension View {
     
+    public func iOS<Content: View>(_ modifier: (Self) -> Content) -> some View {
+        #if os(iOS)
+        return modifier(self)
+        #else
+        return self
+        #endif
+    }
     
+    public func macOS<Content: View>(_ modifier: (Self) -> Content) -> some View {
+        #if os(macOS)
+        return modifier(self)
+        #else
+        return self
+        #endif
+    }
+    
+    // MARK: - View Frame sizes -
+    @inlinable
+    public func infiniteMaxFrame() -> some View {
+        self.frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+    @inlinable
+    public func infiniteMaxWidth() -> some View {
+        self.frame(maxWidth: .infinity)
+    }
+    @inlinable
+    public func infiniteMaxHeight() -> some View {
+        self.frame(maxHeight: .infinity)
+    }
+    
+    // MARK: - Animation Presets -
+    @inlinable
+    public func withFastEaseInAnimation<Result>(
+        _ animation: Animation? = .easeIn(duration: 0.20),
+        _ body: () throws -> Result
+    ) rethrows -> Result {
+        return try withAnimation(animation, body)
+    }
+    
+    public func withInterpolatingSpringAnimation<Result>(_ body: () throws -> Result) rethrows -> Result {
+        return try withAnimation(Animation.interpolatingSpring(mass: 0.960, stiffness: 91, damping: 36, initialVelocity: 16), body)
+    }
+    
+    @inlinable
+    public func withFastEaseInAnimation<Result>(
+        _ animation: Animation? = .easeIn(duration: 0.20),
+        completionCriteria: AnimationCompletionCriteria = .logicallyComplete,
+        _ body: () throws -> Result,
+        completion: @escaping () -> Void
+    ) rethrows -> Result {
+        return try withAnimation(animation,
+                                 completionCriteria: completionCriteria,
+                                 body,
+                                 completion: completion)
+    }
+    
+    /// Ensures animation only runs on iOS platforms.
+    @inlinable
+    @discardableResult
+    public func withAnimationDisabledOnMacOS<Result>(
+            _ animation: Animation? = .easeIn,
+            _ body: () throws -> Result
+    ) rethrows -> Result {
+                
+                #if os(macOS)
+                return try body()
+                #else
+                return try withAnimation(animation, body)
+                #endif
+    }
+    
+    /// Ensures animation only runs on iOS platforms.
+    @inlinable
+    @discardableResult
+    public func withAnimationDisabledOnMacOS<Result>(
+            _ animation: Animation? = .easeIn,
+            completionCriteria: AnimationCompletionCriteria = .logicallyComplete,
+            _ body: () throws -> Result,
+            completion: @escaping () -> Void
+    ) rethrows -> Result {
+                
+                #if os(macOS)
+                return try body()
+                #else
+                return try withAnimation(animation,
+                                         completionCriteria: completionCriteria,
+                                         body,
+                                         completion: completion)
+                #endif
+    }
+}
+
+// MARK: - Modify -
+extension View {
     /// Wraps the view with a modifier which allows for additional calculation.
     /// - Parameter modifier: The custom modified content.
     /// - Returns: Specified view.
@@ -139,103 +234,5 @@ extension View {
         _ onFirstAppearAction: @escaping () -> ()
     ) -> some View {
         return modifier(OnFirstAppearModifier(onFirstAppearAction))
-    }
-}
-
-
-// MARK: - Platform Modifiers -
-
-/// Modifiers to only run specific code on a chosen platform.
-extension View {
-    
-    public func iOS<Content: View>(_ modifier: (Self) -> Content) -> some View {
-        #if os(iOS)
-        return modifier(self)
-        #else
-        return self
-        #endif
-    }
-    
-    public func macOS<Content: View>(_ modifier: (Self) -> Content) -> some View {
-        #if os(macOS)
-        return modifier(self)
-        #else
-        return self
-        #endif
-    }
-    
-    // MARK: - View Frame sizes -
-    @inlinable
-    public func infiniteMaxFrame() -> some View {
-        self.frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-    @inlinable
-    public func infiniteMaxWidth() -> some View {
-        self.frame(maxWidth: .infinity)
-    }
-    @inlinable
-    public func infiniteMaxHeight() -> some View {
-        self.frame(maxHeight: .infinity)
-    }
-    
-    // MARK: - Animation Presets -
-    @inlinable
-    public func withFastEaseInAnimation<Result>(
-        _ animation: Animation? = .easeIn(duration: 0.20),
-        _ body: () throws -> Result
-    ) rethrows -> Result {
-        return try withAnimation(animation, body)
-    }
-    
-    public func withInterpolatingSpringAnimation<Result>(_ body: () throws -> Result) rethrows -> Result {
-        return try withAnimation(Animation.interpolatingSpring(mass: 0.960, stiffness: 91, damping: 36, initialVelocity: 16), body)
-    }
-    
-    @inlinable
-    public func withFastEaseInAnimation<Result>(
-        _ animation: Animation? = .easeIn(duration: 0.20),
-        completionCriteria: AnimationCompletionCriteria = .logicallyComplete,
-        _ body: () throws -> Result,
-        completion: @escaping () -> Void
-    ) rethrows -> Result {
-        return try withAnimation(animation,
-                                 completionCriteria: completionCriteria,
-                                 body,
-                                 completion: completion)
-    }
-    
-    /// Ensures animation only runs on iOS platforms.
-    @inlinable
-    @discardableResult
-    public func withAnimationDisabledOnMacOS<Result>(
-            _ animation: Animation? = .easeIn,
-            _ body: () throws -> Result
-    ) rethrows -> Result {
-                
-                #if os(macOS)
-                return try body()
-                #else
-                return try withAnimation(animation, body)
-                #endif
-    }
-    
-    /// Ensures animation only runs on iOS platforms.
-    @inlinable
-    @discardableResult
-    public func withAnimationDisabledOnMacOS<Result>(
-            _ animation: Animation? = .easeIn,
-            completionCriteria: AnimationCompletionCriteria = .logicallyComplete,
-            _ body: () throws -> Result,
-            completion: @escaping () -> Void
-    ) rethrows -> Result {
-                
-                #if os(macOS)
-                return try body()
-                #else
-                return try withAnimation(animation,
-                                         completionCriteria: completionCriteria,
-                                         body,
-                                         completion: completion)
-                #endif
     }
 }

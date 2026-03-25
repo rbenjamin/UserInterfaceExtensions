@@ -5,6 +5,8 @@
 //  Created by Ben Davis on 12/18/25.
 //
 
+/// Adds support for `MessageUI` in SwiftUI.
+///
 #if canImport(MessageUI) && canImport(UIKit)
 import SwiftUI
 import MessageUI
